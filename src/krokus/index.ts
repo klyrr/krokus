@@ -7,20 +7,27 @@ import {
   getNumberOfRequiredDecimals,
   isValidFormatPattern,
   replaceFormatWithNumber,
-} from './krokusFormat';
-import { getDecimalPart, round, trunc } from './krokusMath';
+} from './format';
+import { getDecimalPart, round, trunc } from './calculate';
+
+export interface FormatPattern {
+  pattern: string;
+  decimal_sep: string;
+  group_sep: string;
+  symbol?: string;
+}
 
 /**
  * formatPattern = { pattern, decimal_sep, group_sep }
  * pattern: #,##0.00
  */
-export const formatNumber = (number, formatPattern) => {
+export const formatNumber = (
+  number: number,
+  formatPattern: FormatPattern
+): string => {
   const pattern = formatPattern.pattern;
   if (!isValidFormatPattern(pattern)) {
     throw 'Given format is wrong: ' + formatPattern.pattern;
-  }
-  if (typeof number !== 'number') {
-    return number;
   }
 
   const numberOfMaximumDecimals = getNumberOfDecimals(pattern);
@@ -55,12 +62,12 @@ export const formatNumber = (number, formatPattern) => {
  * formatPattern = { pattern, decimal_sep, group_sep, symbol }
  * pattern: #,##0.00
  */
-export const formatCurrency = (number, formatPattern) => {
+export const formatCurrency = (
+  number: number,
+  formatPattern: FormatPattern
+): string => {
   if (!isValidFormatPattern(formatPattern.pattern)) {
     throw 'Given format is wrong: ' + formatPattern.pattern;
-  }
-  if (typeof number !== 'number') {
-    return number;
   }
 
   const formattedNumber = formatNumber(number, formatPattern);
@@ -68,12 +75,15 @@ export const formatCurrency = (number, formatPattern) => {
     formatPattern.pattern,
     formattedNumber
   );
-  return formattedCurrency.replace(CURRENCY_SYMBOL, formatPattern.symbol);
+  return formattedCurrency.replace(CURRENCY_SYMBOL, formatPattern.symbol!);
 };
 
 /** Parsing */
 
-export const parseNumber = (formattedNumber, formatPattern) => {
+export const parseNumber = (
+  formattedNumber: string,
+  formatPattern: FormatPattern
+): number | boolean => {
   if (!isValidFormatPattern(formatPattern.pattern)) {
     throw 'Given format is wrong: ' + formatPattern.pattern;
   }
@@ -109,13 +119,16 @@ export const parseNumber = (formattedNumber, formatPattern) => {
  * formatPattern = { pattern, decimal_sep, group_sep }
  * pattern: #,##0.00
  */
-export const parseCurrency = (formattedCurrency, formatPattern) => {
+export const parseCurrency = (
+  formattedCurrency: string,
+  formatPattern: FormatPattern
+): number | boolean => {
   if (!isValidFormatPattern(formatPattern.pattern)) {
     throw 'Given format is wrong: ' + formatPattern.pattern;
   }
 
   const formattedNumber = formattedCurrency
-    .replace(formatPattern.symbol, '')
+    .replace(formatPattern.symbol!, '')
     .trim();
 
   return parseNumber(formattedNumber, formatPattern);

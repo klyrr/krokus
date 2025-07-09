@@ -1,7 +1,0 @@
---slow 20
---require @babel/register
---reporter spec
---check-leaks
---perf-basic-prof
---prof
---recursive

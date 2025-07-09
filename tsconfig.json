@@ -1,0 +1,31 @@
+{ 
+   "compilerOptions": {
+    "module": "ES2022",
+    "target": "ES2022",
+    "outDir": "dist",
+    "baseUrl": ".",
+    "rootDir": ".",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "lib": ["dom", "esnext"],
+    "types": ["vite/client", "node"],
+    // Generate d.ts files
+    "declaration": true,
+    // This compiler run should
+    // only output d.ts files
+    "emitDeclarationOnly": true,
+  },
+  "files": [
+    "src/index.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/**/*.spec.ts"
+  ]
+}

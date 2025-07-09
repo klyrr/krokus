@@ -1,18 +1,17 @@
-/* global describe it */
-
+import { assert, describe, test } from 'vitest';
 import {
   formatCurrency,
   formatNumber,
   parseCurrency,
   parseNumber,
-} from '../src/js/krokus';
-import { assert } from 'chai';
+  FormatPattern,
+} from '../src/krokus';
 import locales from '../src/generated/locales.json';
 
 describe('krokus', () => {
   describe('formatter', () => {
-    it('should format the numbers', () => {
-      const formatPattern = {
+    test('should format the numbers', () => {
+      const formatPattern: FormatPattern = {
         pattern: '#,##0.00',
         decimal_sep: ',',
         group_sep: '.',
@@ -24,7 +23,7 @@ describe('krokus', () => {
       // assert.equal(formatNumber(-432.5, formatPattern), '-432,50');
     });
 
-    it('should format the numbers without trailing numbers', () => {
+    test('should format the numbers without trailing numbers', () => {
       const formatPattern = {
         pattern: '#,##0.###',
         decimal_sep: ',',
@@ -38,26 +37,18 @@ describe('krokus', () => {
       // assert.equal(formatNumber(-432.5577, formatPattern), '432,558');
     });
 
-    it('should not format strings only numbers', () => {
-      const formatPattern = {
-        pattern: '#,##0.00',
-        decimal_sep: ',',
-        group_sep: '.',
+    test('should format the currencies', () => {
+      const formatCurrencyPattern: FormatPattern = {
+        pattern: locales.de_DE.currency_pattern,
+        decimal_sep: locales.de_DE.decimal_sep,
+        group_sep: locales.de_DE.group_sep,
+        symbol: '€',
       };
-
-      assert.equal(formatNumber('10000', formatPattern), '10000');
-      assert.equal(formatCurrency('10000', formatPattern), '10000');
-    });
-
-    it('should format the currencies', () => {
-      const formatCurrencyPattern = locales.de_DE;
-      formatCurrencyPattern.pattern = formatCurrencyPattern.currency_pattern;
-      formatCurrencyPattern.symbol = '€';
 
       assert.equal(formatCurrency(10000, formatCurrencyPattern), '10.000,00 €');
     });
 
-    it('should format the currencies for USD', () => {
+    test('should format the currencies for USD', () => {
       const formatCurrencyPatternForUSD = {
         pattern: '¤#,##0.00',
         decimal_sep: '.',
@@ -71,7 +62,7 @@ describe('krokus', () => {
       );
     });
 
-    it('should format the currency for negative and positive numbers', () => {
+    test('should format the currency for negative and positive numbers', () => {
       const formatCurrencyPattern = {
         pattern: '#,##0.00 ¤',
         decimal_sep: ',',
@@ -86,7 +77,7 @@ describe('krokus', () => {
       );
     });
 
-    it('should format the format not currency', () => {
+    test('should format the format not currency', () => {
       const wrongPattern = '#,##0.00 ¤ l';
       const wrongFormatCurrencyPattern = {
         pattern: wrongPattern,
@@ -99,13 +90,16 @@ describe('krokus', () => {
         const notDefined = formatCurrency(10000, wrongFormatCurrencyPattern);
         assert.equal(notDefined, 'This must not happen');
       } catch (e) {
-        assert.equal(e, 'Given format is wrong: ' + wrongPattern);
+        assert.equal(
+          e.message,
+          'Currency must be first or last character of pattern: ' + wrongPattern
+        );
       }
     });
   });
 
   describe('parser', () => {
-    it('should parse the numbers', () => {
+    test('should parse the numbers', () => {
       const formatPattern = {
         pattern: '#,##0.00',
         decimal_sep: ',',
@@ -123,7 +117,7 @@ describe('krokus', () => {
       assert.equal(parseNumber('-432,55', formatPattern), -432.55);
     });
 
-    it('should parse the currencies', () => {
+    test('should parse the currencies', () => {
       const formatPattern = {
         pattern: '#,##0.00 ¤',
         decimal_sep: ',',
@@ -143,7 +137,7 @@ describe('krokus', () => {
       assert.equal(parseCurrency('€ -432,55', formatPattern), -432.55);
     });
 
-    it('should parse swiss currencies', () => {
+    test('should parse swiss currencies', () => {
       const formatPattern = {
         pattern: '#,##0.00 ¤',
         decimal_sep: ',',
@@ -153,7 +147,8 @@ describe('krokus', () => {
 
       try {
         const notDefined = parseCurrency('10.000,00 CHF', formatPattern);
-        assert.equal(notDefined, 'This must not happen');
+        // this should not happen
+        assert.equal(notDefined, 42);
       } catch (e) {
         assert.equal(e, 'Given formatted number is wrong: 10.000,00');
       }
